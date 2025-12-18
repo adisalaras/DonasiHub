@@ -11,11 +11,37 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Routes
+const authRoutes = require('./src/services/auth/auth.route');
+
 // Test route
 app.get('/', (req, res) => {
     res.json({
         message: 'Welcome to DonasiHub API',
         status: 'running'
+    });
+});
+
+// API routes
+app.use('/api/auth', authRoutes);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    const status = err.status || 500;
+    const message = err.message || 'Internal Server Error';
+
+    // Handle express-validation errors
+    if (err.name === 'ValidationError') {
+        return res.status(400).json({
+            success: false,
+            message: 'Validation Error',
+            errors: err.details
+        });
+    }
+
+    return res.status(status).json({
+        success: false,
+        message
     });
 });
 
